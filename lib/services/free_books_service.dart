@@ -8,16 +8,12 @@ import '../models/book.dart';
 import 'api_config.dart';
 
 class FreeBooksService {
-
-  static String get baseUrl {
-    if (ApiConfig.baseUrl == null) {
-      throw Exception('API Base URL not loaded');
-    }
-    return ApiConfig.baseUrl!;
-  }
+  static String? get baseUrl => ApiConfig.baseUrl;
 
   /// 📡 Fetch free books list
   static Future<List<Map<String, dynamic>>> fetchBooks() async {
+    if (baseUrl == null) return []; // 🔥 OFFLINE SAFE
+
     try {
       final res = await http
           .get(Uri.parse('$baseUrl/free-books'))
@@ -36,6 +32,10 @@ class FreeBooksService {
 
   /// ⬇️ Download PDF → save locally
   static Future<Book> downloadBook(Map<String, dynamic> data) async {
+    if (baseUrl == null) {
+      throw Exception('No internet / server');
+    }
+
     final String fileName = data['id'];
     final String url = '$baseUrl/free_pdfs/$fileName';
 
