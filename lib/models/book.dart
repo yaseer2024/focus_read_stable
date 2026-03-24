@@ -1,17 +1,17 @@
 class Book {
   final String id;
   final String title;
-  final String path; // local file path (even for server books after download)
+  final String path;
 
   int lastPage;
   int totalPages;
 
-  // 🔥 Reading streak
   int streak;
   String? lastReadDate;
 
-  // 🌐 NEW: remote or local
   bool isRemote;
+
+  String category;
 
   Book({
     required this.id,
@@ -21,7 +21,8 @@ class Book {
     this.totalPages = 0,
     this.streak = 0,
     this.lastReadDate,
-    this.isRemote = false, // 👈 default = LOCAL (CORE SAFE)
+    this.isRemote = false,
+    this.category = "General",
   });
 
   Map<String, dynamic> toJson() {
@@ -34,6 +35,7 @@ class Book {
       'streak': streak,
       'lastReadDate': lastReadDate,
       'isRemote': isRemote,
+      'category': category,
     };
   }
 
@@ -46,16 +48,13 @@ class Book {
       totalPages: json['totalPages'] ?? 0,
       streak: json['streak'] ?? 0,
       lastReadDate: json['lastReadDate'],
-      isRemote: json['isRemote'] ?? false, // 👈 backward compatible
+      isRemote: json['isRemote'] ?? false,
+      category: json['category'] ?? "General",
     );
   }
 
   double get progress {
     if (totalPages == 0) return 0;
     return (lastPage + 1) / totalPages;
-  }
-
-  String get progressPercent {
-    return '${(progress * 100).toInt()}%';
   }
 }

@@ -22,26 +22,20 @@ class _FreeBooksScreenState extends State<FreeBooksScreen> {
     _loadBooks();
   }
 
-  /// 📡 Load books dynamically from server
   Future<void> _loadBooks() async {
-    try {
-      final data = await FreeBooksService.fetchBooks();
-      if (!mounted) return;
+    final data = await FreeBooksService.fetchBooks();
+    if (!mounted) return;
 
-      setState(() {
-        serverBooks = data;
-        loading = false;
-      });
-    } catch (_) {
-      if (!mounted) return;
-      setState(() => loading = false);
-    }
+    setState(() {
+      serverBooks = data;
+      loading = false;
+    });
   }
 
-  /// ⬇️ Download → save → open
   Future<void> _openBook(Map<String, dynamic> data) async {
     try {
-      final Book downloaded = await FreeBooksService.downloadBook(data);
+      final Book downloaded =
+      await FreeBooksService.downloadBook(data);
 
       final books = await BookStorage.load();
       final exists = books.any((b) => b.id == downloaded.id);
@@ -64,11 +58,8 @@ class _FreeBooksScreenState extends State<FreeBooksScreen> {
         ),
       );
     } catch (e) {
-      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to open book'),
-        ),
+        const SnackBar(content: Text('Failed to open book')),
       );
     }
   }
@@ -76,31 +67,19 @@ class _FreeBooksScreenState extends State<FreeBooksScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Free Books'),
-      ),
+      appBar: AppBar(title: const Text('Free Books')),
       body: loading
           ? const Center(child: CircularProgressIndicator())
           : serverBooks.isEmpty
-          ? const Center(
-        child: Text(
-          'No free books available',
-          style: TextStyle(fontSize: 16),
-        ),
-      )
-          : ListView.separated(
+          ? const Center(child: Text("No books available"))
+          : ListView.builder(
         itemCount: serverBooks.length,
-        separatorBuilder: (_, __) =>
-        const Divider(height: 1),
         itemBuilder: (_, i) {
           final book = serverBooks[i];
 
           return ListTile(
-            leading:
-            const Icon(Icons.cloud_download_outlined),
-            title: Text(book['title'] ?? 'Untitled'),
-            trailing:
-            const Icon(Icons.chevron_right),
+            title: Text(book['title']),
+            trailing: const Icon(Icons.download),
             onTap: () => _openBook(book),
           );
         },
