@@ -42,7 +42,6 @@ class _UploadScreenState extends State<UploadScreen> {
 
     setState(() => loading = true);
 
-    /// 📂 SAVE LOCALLY (ALWAYS)
     final dir = await getApplicationDocumentsDirectory();
     final saved = await file!.copy('${dir.path}/$fileName');
 
@@ -56,7 +55,6 @@ class _UploadScreenState extends State<UploadScreen> {
 
     await BookStorage.addBook(book);
 
-    /// 🌍 OPTIONAL SERVER UPLOAD
     if (shareToCommunity && ApiConfig.baseUrl != null) {
       try {
         final req = http.MultipartRequest(
@@ -71,61 +69,172 @@ class _UploadScreenState extends State<UploadScreen> {
         req.fields['category'] = category;
 
         await req.send().timeout(const Duration(seconds: 10));
-      } catch (_) {
-        // silent fail → local still saved
-      }
+      } catch (_) {}
     }
 
     setState(() => loading = false);
-
     Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Upload Book')),
-      body: Padding(
+      backgroundColor: const Color(0xFF0B1120),
+
+      appBar: AppBar(
+        title: const Text('Upload Book'),
+        backgroundColor: const Color(0xFF0B1120),
+        elevation: 0,
+      ),
+
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            ElevatedButton(
-              onPressed: pickFile,
-              child: const Text("Pick PDF"),
+            /// 📂 PICK FILE CARD
+            GestureDetector(
+              onTap: pickFile,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF141E30),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.05),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    const Icon(Icons.upload_file,
+                        size: 40, color: Colors.amber),
+                    const SizedBox(height: 10),
+                    Text(
+                      file == null
+                          ? "Tap to select PDF"
+                          : "Change File",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      "Only PDF files supported",
+                      style: TextStyle(
+                        color: Colors.grey[500],
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
 
+            const SizedBox(height: 20),
+
+            /// 📄 FILE PREVIEW
             if (fileName.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.all(10),
-                child: Text("Selected: $fileName"),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF141E30),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.picture_as_pdf,
+                        color: Colors.redAccent, size: 30),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        fileName,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
               ),
 
-            DropdownButton<String>(
-              value: category,
-              isExpanded: true,
-              items: ["General", "Self Help", "Education", "Stories"]
-                  .map((e) =>
-                  DropdownMenuItem(value: e, child: Text(e)))
-                  .toList(),
-              onChanged: (v) => setState(() => category = v!),
+            const SizedBox(height: 20),
+
+            /// 📚 CATEGORY DROPDOWN
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF141E30),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: category,
+                  dropdownColor: const Color(0xFF141E30),
+                  isExpanded: true,
+                  style: const TextStyle(color: Colors.white),
+                  items: ["General", "Self Help", "Education", "Stories"]
+                      .map((e) => DropdownMenuItem(
+                    value: e,
+                    child: Text(e),
+                  ))
+                      .toList(),
+                  onChanged: (v) => setState(() => category = v!),
+                ),
+              ),
             ),
 
             const SizedBox(height: 20),
 
             /// 🌍 COMMUNITY TOGGLE
-            SwitchListTile(
-              title: const Text("Share to community 🌍"),
-              value: shareToCommunity,
-              onChanged: (v) => setState(() => shareToCommunity = v),
+            Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF141E30),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: SwitchListTile(
+                title: const Text(
+                  "Share to community 🌍",
+                  style: TextStyle(color: Colors.white),
+                ),
+                subtitle: const Text(
+                  "Let others read your book",
+                  style: TextStyle(color: Colors.grey),
+                ),
+                value: shareToCommunity,
+                activeColor: Colors.amber,
+                onChanged: (v) =>
+                    setState(() => shareToCommunity = v),
+              ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 30),
 
+            /// 🚀 UPLOAD BUTTON
             loading
-                ? const CircularProgressIndicator()
-                : ElevatedButton(
-              onPressed: upload,
-              child: const Text("Upload"),
+                ? const CircularProgressIndicator(color: Colors.amber)
+                : SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.amber,
+                  foregroundColor: Colors.black,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                onPressed: upload,
+                child: const Text(
+                  "Upload Book",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
             ),
           ],
         ),

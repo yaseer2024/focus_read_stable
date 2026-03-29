@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'screens/home_screen.dart';
+import './screens/splash.dart'; // ✅ Import your splash screen
 import 'services/api_config.dart';
 
 void main() async {
@@ -33,7 +34,8 @@ class FocusReadApp extends StatelessWidget {
           brightness: Brightness.light,
         ),
       ),
-      home: const HomeScreen(),
+      // ✅ Show SplashScreen first
+      home: const SplashScreen(),
     );
   }
 }

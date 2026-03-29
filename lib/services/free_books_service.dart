@@ -12,7 +12,7 @@ class FreeBooksService {
 
   /// 📡 Fetch free books list
   static Future<List<Map<String, dynamic>>> fetchBooks() async {
-    if (baseUrl == null) return []; // 🔥 OFFLINE SAFE
+    if (baseUrl == null) return [];
 
     try {
       final res = await http
@@ -54,6 +54,7 @@ class FreeBooksService {
       title: data['title'] ?? 'Untitled',
       path: file.path,
       isRemote: true,
+      category: data['category'] ?? 'General', // ✅ FIXED
     );
   }
 }
